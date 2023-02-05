@@ -59,7 +59,7 @@ class World:
 
     def exit_at(self, x, y):
         """Returns True if there is an exit at (x,y)"""
-        return self.exitcell == (x,y)
+        return self.exitcell == (x, y)
 
     def wall_at(self, x, y):
         """Returns True if there is a wall at (x,y)"""
@@ -67,7 +67,7 @@ class World:
 
     def bomb_at(self, x, y):
         """Returns the bomb at (x,y) or None"""
-        return self.bombs.get(self.index(x,y))
+        return self.bombs.get(self.index(x, y))
 
     def explosion_at(self, x, y):
         """Returns the explosion at (x,y) or None"""

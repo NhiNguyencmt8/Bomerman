@@ -10,6 +10,8 @@ from colorama import Fore, Back
 from PriorityQueue import PriorityQueue
 from expectimax import Node, expectimaxSearch, newNode, evaluate
 movesMade = 0
+depth = 2
+monitorDepth = depth
 
 class TestCharacter(CharacterEntity):
     firstTime = True
@@ -137,54 +139,8 @@ class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
         movesMade = 0
-        depth = 2
-        monitorDepth = depth
         rootNode = Node(0, self.x, self.y)
-        while monitorDepth >= 0:
-            if monitorDepth % 2 == 0: #If depth depth (Your turn_
-                # Must be maxNode aka Bomberman Node
-                if monitorDepth == depth: #If rootNode
-                    listChildren = self.eight_neighbors(wrld, rootNode.dx, rootNode.dy)
-                    for element in listChildren:
-                        childNode = newNode(0, element[0], element[1])
-                        value = evaluate(childNode, wrld)
-                        childNode.value = value
-                        rootNode.children.append(childNode)
-                        print("Child expand from root node\n")
-
-                else: #Depth = 0
-                    for i, child in enumerate(rootNode.children):
-                        for j, grandChild in enumerate(child.children):
-                            listChildren = self.eight_neighbors(wrld, grandChild.dx, grandChild.dy)
-                            for element in listChildren:
-                                childNode = newNode(0, element[0], element[1])
-                                value = evaluate(childNode, wrld)
-                                childNode.value = value
-                                grandChild.children.append(childNode)
-                            rootNode.children[i].children[j] = grandChild
-            else: #If Monsters turn
-                if len(wrld.monsters) == 0: #No Monster
-
-                    #Our turn again
-                    for i, child in enumerate(rootNode.children):
-                        listChildren = self.eight_neighbors(wrld, child.dx, child.dy)
-                        for element in listChildren:
-                            childNode = newNode(0, element[0], element[1])
-                            value = evaluate(childNode, wrld)
-                            childNode.value = value
-                            child.children.append(childNode)
-                        rootNode.children[i] = child
-
-                else: # Monster node -> only at depth 1
-                    monsterLoc = monster_location(wrld)
-                    listChildrenMons = self.eight_neighbors(wrld, monsterLoc[0], monsterLoc[1])
-                    for element in listChildrenMons:
-                        childNode = newNode(0, element[0], element[1])
-                        value = evaluate(childNode, wrld)
-                        childNode.value = value
-                        rootNode.children.children.append(childNode)
-            monitorDepth -= 1
-
+        makingTree
         while movesMade < wrld.time:
             bestValFromChildren = []
             print(rootNode.children)
@@ -195,6 +151,42 @@ class TestCharacter(CharacterEntity):
             bestMove = rootNode.children[indexHasBestVal]
             movesMade += 1
         self.move(bestMove.dx - self.x, bestMove.dy - self.x)
+    def makingTree(self,rootNode, depth, wrld):
+        if monitorDepth == depth:  # If rootNode
+            listChildren = self.eight_neighbors(wrld, rootNode.dx, rootNode.dy)
+            for element in listChildren:
+                childNode = newNode(0, element[0], element[1])
+                value = evaluate(childNode, wrld)
+                childNode.value = value
+                rootNode.children.append(childNode)
+                print("Child expand from root node\n")
+
+        else:  # Depth = 0
+            for child in rootNode.children:
+
+        else:  # If Monsters turn
+        if len(wrld.monsters) == 0:  # No Monster
+
+            # Our turn again
+            for i, child in enumerate(rootNode.children):
+                listChildren = self.eight_neighbors(wrld, child.dx, child.dy)
+                for element in listChildren:
+                    childNode = newNode(0, element[0], element[1])
+                    value = evaluate(childNode, wrld)
+                    childNode.value = value
+                    child.children.append(childNode)
+                rootNode.children[i] = child
+
+        else:  # Monster node -> only at depth 1
+            monsterLoc = monster_location(wrld)
+            listChildrenMons = self.eight_neighbors(wrld, monsterLoc[0], monsterLoc[1])
+            for element in listChildrenMons:
+                childNode = newNode(0, element[0], element[1])
+                value = evaluate(childNode, wrld)
+                childNode.value = value
+                rootNode.children.children.append(childNode)
+    monitorDepth -= 1
+
 
 def euclidean_dist(point_one, point_two):
     return ((point_one[0] - point_two[0]) ** 2 + (point_one[1] - point_two[1]) ** 2) ** 0.5
