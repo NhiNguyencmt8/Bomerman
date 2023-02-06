@@ -14,6 +14,7 @@ int euclidean_distance_to_exit(wrld:World)
 int euclidean_distance_to_monster(wrld:World) //Returns Nearest Monster
 
 """
+from PriorityQueue import PriorityQueue
 
 
 def euclidean_dist(point_one, point_two):
@@ -123,3 +124,43 @@ def euclidean_distance_to_monster(wrld):
     else:
         return min([((self[0] - monster[1][0].x) ** 2 + (self[1] - monster[1][0].y) ** 2) ** 0.5 for monster in
                     wrld.monsters.items()])
+
+
+def a_star_distance_to_exit(wrld, node):
+    start = (node.dx, node.dy)  # Start at current position
+    goal = wrld.exitcell  # Goal is exit cell
+
+    cost_so_far = {start: 0}  # Dictionary of costs to get to each cell
+    came_from = {start: None}  # Dictionary of where each cell came from
+
+    frontier = PriorityQueue()  # Priority queue of cells to visit
+    frontier.put(start, 0)
+
+    while not frontier.empty():
+        current = frontier.get()
+
+        if current == goal:
+            break
+
+        # Check all walkable neighbors of current cell
+        for neighbor in eight_neighbors(wrld, current[0], current[1]):
+            # Calculate cost to get to neighbor - 1 or 1.4
+            new_cost = cost_so_far[current] + euclidean_dist(current, neighbor)
+
+            # If neighbor has no path or new path is better, update path
+            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                cost_so_far[neighbor] = new_cost
+                priority = new_cost + euclidean_dist(neighbor, goal)
+                frontier.put(neighbor, priority)
+                came_from[neighbor] = current
+
+    # Reconstruct path using came_from dictionary
+    currPos = goal
+    finalPath = []
+    finalPath.append(goal)
+    while currPos != start:
+        currPos = came_from[currPos]
+        finalPath.append(currPos)
+
+    finalPath.reverse()
+    return len(finalPath)
