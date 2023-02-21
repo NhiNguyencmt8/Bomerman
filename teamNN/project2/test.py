@@ -179,8 +179,7 @@ for i_episode in range(num_episodes):
     for t in count():
         action = select_action(state)
         # observation, reward, terminated, truncated, _ = env.step(action.item())
-        reward = env.nextStep(env.action_list[action])
-        terminated = False
+        reward, terminated = env.nextStep(env.action_list[action])
         truncated = False
         observation = env.getStateImage()
         reward = torch.tensor([reward], device=device)

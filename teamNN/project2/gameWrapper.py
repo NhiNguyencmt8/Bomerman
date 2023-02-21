@@ -62,6 +62,6 @@ class GameWrapper():
         next(iter(self.gameObj.world.characters.values()))[0].setNextAction(actionString)
         (self.gameObj.world, self.gameObj.events) = self.gameObj.world.next()
         self.gameObj.display_gui()
-        pygame.time.wait(500)
+        # pygame.time.wait(1)
         self.gameObj.world.next_decisions()
-        return self.gameObj.world.scores["me"]
+        return self.gameObj.world.scores["me"], self.gameObj.done()
