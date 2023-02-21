@@ -1,3 +1,4 @@
 {
-  "python.analysis.extraPaths": ["./Bomberman"]
+  "python.analysis.extraPaths": ["./Bomberman"],
+  "cSpell.words": ["matplotlib"]
 }
