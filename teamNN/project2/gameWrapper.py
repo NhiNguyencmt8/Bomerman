@@ -27,12 +27,12 @@ class GameWrapper():
     action_space = my_array = [i for i in range(0, len(action_list))]
 
     def get_random_action(self):
-        return random.choice(self.action_list)
+        return random.choice(self.action_space)
 
     # Constuctor
     def __init__(self, filename):
         self.mapFile = filename
-        self.reset();
+        self.reset()
 
     def reset(self):
         """ Resets the game """

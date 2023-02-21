@@ -35,7 +35,7 @@ plt.ion()
 # if gpu is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-env = GameWrapper("map.txt")
+env: GameWrapper = GameWrapper("map.txt")
 # env = gym.make("CartPole-v1")
 # print(array.shape)  # Output: (120, 160)
 # print(array.dtype)  # Output: uint8
@@ -61,10 +61,11 @@ n_actions = len(env.action_list)
 # Get the number of state observations
 env.reset()
 state = env.getStateImage()
-n_observations = len(state)
+# n_observations = len(state)
+(length, width) = state.shape
 
-policy_net = DQN(n_observations, n_actions).to(device)
-target_net = DQN(n_observations, n_actions).to(device)
+policy_net = DQN(length, width, n_actions).to(device)
+target_net = DQN(length, width, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 
 optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
@@ -86,7 +87,7 @@ def select_action(state):
             # found, so we pick action with the larger expected reward.
             return policy_net(state).max(1)[1].view(1, 1)
     else:
-        return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
+        return torch.tensor([[env.get_random_action()]], device=device, dtype=torch.long)
 
 
 episode_durations = []
@@ -172,11 +173,16 @@ else:
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get it's state
-    state, info = env.reset()
+    env.reset()
+    state = env.getStateImage()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
     for t in count():
         action = select_action(state)
-        observation, reward, terminated, truncated, _ = env.step(action.item())
+        # observation, reward, terminated, truncated, _ = env.step(action.item())
+        reward = env.nextStep(env.action_list[action])
+        terminated = False
+        truncated = False
+        observation = env.getStateImage()
         reward = torch.tensor([reward], device=device)
         done = terminated or truncated
 
