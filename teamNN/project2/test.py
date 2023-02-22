@@ -80,14 +80,14 @@ def select_action(state):
     eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
     steps_done += 1
     if sample > eps_threshold:
-        print("Selecting action with policy net")
+        # print("Selecting action with policy net")
         with torch.no_grad():
             # t.max(1) will return the largest column value of each row.
             # second column on max result is index of where max element was
             # found, so we pick action with the larger expected reward.
             return policy_net(state).max(1)[1].view(1, 1)
     else:
-        print("Selecting random action")
+        # print("Selecting random action")
         return torch.tensor([[env.get_random_action()]], device=device, dtype=torch.long)
 
 
@@ -123,7 +123,7 @@ def plot_durations(show_result=False):
 def optimize_model():
     if len(memory) < BATCH_SIZE:
         return
-    print("Optimizing model")
+    # print("Optimizing model")
     transitions = memory.sample(BATCH_SIZE)
     # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
     # detailed explanation). This converts batch-array of Transitions
@@ -180,9 +180,8 @@ for i_episode in range(num_episodes):
     env.reset()
     state = env.getStateImage()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+    # state2 = torch.tensor(state, dtype=torch.float32, device=device)
     # print(state.shape)
-    if state.shape[0] != 1:
-        print("Error")
     for t in count():
         action = select_action(state)
         # observation, reward, terminated, truncated, _ = env.step(action.item())
@@ -215,7 +214,7 @@ for i_episode in range(num_episodes):
         target_net.load_state_dict(target_net_state_dict)
 
         if done:
-            episode_durations.append(t + 1)
+            episode_durations.append(reward)
             plot_durations()
             break
 

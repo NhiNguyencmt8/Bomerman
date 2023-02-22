@@ -14,8 +14,8 @@ class DQN(nn.Module):
         self.fc2 = nn.Linear(512, num_classes)
 
     def forward(self, x):
-        print(x.shape, "In DQN")
-        x = self.pool(F.relu(self.conv1(x)))
+        # print(x.shape, "In DQN")
+        x = self.pool(F.relu(self.conv1(x.unsqueeze(1))))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 64 * 28 * 12)
         x = F.relu(self.fc1(x))

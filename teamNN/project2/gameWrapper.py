@@ -55,7 +55,7 @@ class GameWrapper():
 
         grayscale_image = downscaled_image.convert("L")
         # grayscale_image.save("grayscale_image.jpg")
-        print(np.array(grayscale_image).shape)
+        # print(np.array(grayscale_image).shape)
         return np.array(grayscale_image)
 
     def nextStep(self, actionString):
