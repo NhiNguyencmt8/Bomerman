@@ -1,6 +1,6 @@
 import time
 
-import gym as gym
+# import gym as gym
 import numpy as np
 
 from gameWrapper import GameWrapper
@@ -8,7 +8,7 @@ import pygame
 from PIL import Image
 import torch
 
-import gymnasium as gym
+# import gymnasium as gym
 import sys
 import math
 import random
@@ -51,7 +51,7 @@ env: GameWrapper = GameWrapper("map.txt")
 BATCH_SIZE = 128
 GAMMA = 0.99
 EPS_START = 0.9
-EPS_END = 0.05
+EPS_END = 0
 EPS_DECAY = 1000
 TAU = 0.005
 LR = 1e-4
@@ -78,6 +78,8 @@ def select_action(state):
     global steps_done
     sample = random.random()
     eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
+    if steps_done % 10000 == 0:
+        print("Epsilon threshold: " + str(eps_threshold))
     steps_done += 1
     if sample > eps_threshold:
         # print("Selecting action with policy net")
@@ -108,7 +110,7 @@ def plot_durations(show_result=False):
     # Take 100 episode averages and plot them too
     if len(durations_t) >= 100:
         means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
-        means = torch.cat((torch.zeros(99), means))
+        means = torch.cat((torch.full((99,), 5000), means))
         plt.plot(means.numpy())
 
     plt.pause(0.001)  # pause a bit so that plots are updated
@@ -170,10 +172,7 @@ def optimize_model():
 
 
 # Main Loop
-if torch.cuda.is_available():
-    num_episodes = 600
-else:
-    num_episodes = 600
+num_episodes = 1000
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get it's state
@@ -182,14 +181,11 @@ for i_episode in range(num_episodes):
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
     # state2 = torch.tensor(state, dtype=torch.float32, device=device)
     # print(state.shape)
-    for t in count():
+    for t in count(): #Euqivalent to while true
         action = select_action(state)
-        # observation, reward, terminated, truncated, _ = env.step(action.item())
         reward, terminated = env.nextStep(env.action_list[action])
-        truncated = False
         observation = env.getStateImage()
         reward = torch.tensor([reward], device=device)
-        done = terminated or truncated
 
         if terminated:
             next_state = None
@@ -213,11 +209,17 @@ for i_episode in range(num_episodes):
             target_net_state_dict[key] = policy_net_state_dict[key] * TAU + target_net_state_dict[key] * (1 - TAU)
         target_net.load_state_dict(target_net_state_dict)
 
-        if done:
+        if terminated:
             episode_durations.append(reward)
             plot_durations()
             break
 
+
+# Save the model
+path = "../models/policy_net.pt"
+torch.save(policy_net.state_dict(), path)
+print('Saved')
+time.sleep(1)
 print('Complete')
 plot_durations(show_result=True)
 plt.ioff()

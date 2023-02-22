@@ -21,9 +21,10 @@ class GameWrapper():
     gameObj: Game = None
     mapFile = None
 
-    action_list: list[str | Any] = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", "wb", "wb", "ab", "sb", "db", "wab",
-                                    "wdb", "sab", "sdb",
-                                    "wbb", ""]
+    # action_list: list[str] = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", "wb", "wb", "ab", "sb", "db", "wab",
+    #                                 "wdb", "sab", "sdb",
+    #                                 "wbb", ""]
+    action_list: list[str] = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", "b"]
     action_space = my_array = [i for i in range(0, len(action_list))]
 
     def get_random_action(self):
@@ -39,9 +40,9 @@ class GameWrapper():
         self.gameObj = Game.fromfile(self.mapFile)
         self.gameObj.add_character(TrainingCharacter("me", "C", 0, 0))
 
-    def getStateImage(self):
+    def getStateImageOld(self):
         """ Returns the current state of the game as an image """
-        self.gameObj.display_gui()
+        # self.gameObj.display_gui()
         screen_array = pygame.surfarray.array3d(self.gameObj.screen)
         pil_image = Image.fromarray(screen_array)
         pil_image = pil_image.convert("RGB")
@@ -57,6 +58,34 @@ class GameWrapper():
         # grayscale_image.save("grayscale_image.jpg")
         # print(np.array(grayscale_image).shape)
         return np.array(grayscale_image)
+
+    def getStateImage(self):
+        #Make an np array of size world.width() x world.height()
+        #Fill it with 127s
+        returnArray = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 127)
+
+        for x in range(self.gameObj.world.width()):
+            for y in range(self.gameObj.world.height()):
+                if self.gameObj.world.wall_at(x, y): # Walls
+                    returnArray[x][y] = 255
+                if self.gameObj.world.explosion_at(x, y): # Explosion
+                    returnArray[x][y] = 42
+                if self.gameObj.world.characters_at(x, y): # Player
+                    returnArray[x][y] = 0
+                if self.gameObj.world.monsters_at(x, y): # Monster
+                    returnArray[x][y] = 84
+                if self.gameObj.world.exit_at(x, y): # Portal
+                    returnArray[x][y] = 211
+                if self.gameObj.world.bomb_at(x, y): # Bomb
+                    returnArray[x][y] = 169
+
+        pil_image = Image.fromarray(returnArray)
+        # pil_image = pil_image.convert("RGB")
+        # pil_image.save("image.png")
+
+        return returnArray
+        
+
 
     def nextStep(self, actionString):
         """ Performs the actionString on the game, and returns the reward """
