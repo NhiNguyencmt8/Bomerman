@@ -1,11 +1,13 @@
 import sys
 import random
+import time
 from typing import List, Any
 
 import numpy as np
 import pygame
 from PIL import Image
 
+from teamNN.utility import euclidean_distance_to_exit
 from traningchracter import TrainingCharacter
 
 sys.path.insert(0, '../../bomberman')
@@ -92,6 +94,21 @@ class GameWrapper():
         next(iter(self.gameObj.world.characters.values()))[0].setNextAction(actionString)
         (self.gameObj.world, self.gameObj.events) = self.gameObj.world.next()
         self.gameObj.display_gui()
-        # pygame.time.wait(1)
+        # pygame.time.wait(1000)
         self.gameObj.world.next_decisions()
-        return self.gameObj.world.scores["me"], self.gameObj.done()
+        euclidean_distance = 0
+        if self.gameObj.done():
+            # print("Done")
+            pass
+            # time.sleep(2)
+        else:
+            euclidean_distance = euclidean_distance_to_exit(self.gameObj.world) * 10
+
+        if self.gameObj.world.scores["me"] > 0:
+            winOrLoss = 500
+        else:
+            winOrLoss = -500
+
+        score = (self.gameObj.world.time - 5000) - int(euclidean_distance) + winOrLoss
+        # print(score)
+        return score, self.gameObj.done()

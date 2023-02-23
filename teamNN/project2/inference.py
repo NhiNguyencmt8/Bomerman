@@ -25,9 +25,10 @@ terminated = False
 while not terminated:
     state = torch.tensor(env.getStateImage(), dtype=torch.float32, device=device).unsqueeze(0)
     action_index = model(state).max(1)[1].view(1, 1)
-    print("Action index: " + str(env.action_list[action_index]))
+    print("Action: " + str(env.action_list[action_index]))
     reward, terminated = env.nextStep(env.action_list[action_index])
-    sleep(1)
+    print("Reward: " + str(reward))
+    sleep(0.1)
 
 print(reward)
 sleep(5)
