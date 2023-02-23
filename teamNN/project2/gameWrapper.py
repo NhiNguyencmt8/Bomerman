@@ -7,12 +7,13 @@ import numpy as np
 import pygame
 from PIL import Image
 
-from teamNN.utility import euclidean_distance_to_exit
+
 from traningchracter import TrainingCharacter
 
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
+from utility import euclidean_distance_to_exit
 from game import Game
 
 
@@ -64,26 +65,32 @@ class GameWrapper():
     def getStateImage(self):
         #Make an np array of size world.width() x world.height()
         #Fill it with 127s
-        returnArray = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 127)
+        threat_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
+        wall_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
+        exit_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
+        self_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
 
         for x in range(self.gameObj.world.width()):
             for y in range(self.gameObj.world.height()):
                 if self.gameObj.world.wall_at(x, y): # Walls
-                    returnArray[x][y] = 255
+                    wall_array[x][y] = 1
                 if self.gameObj.world.explosion_at(x, y): # Explosion
-                    returnArray[x][y] = 42
+                    threat_array[x][y] = 1
                 if self.gameObj.world.characters_at(x, y): # Player
-                    returnArray[x][y] = 0
+                    self_array[x][y] = 1
                 if self.gameObj.world.monsters_at(x, y): # Monster
-                    returnArray[x][y] = 84
+                    threat_array[x][y] = 1
                 if self.gameObj.world.exit_at(x, y): # Portal
-                    returnArray[x][y] = 211
+                    exit_array[x][y] = 1
                 if self.gameObj.world.bomb_at(x, y): # Bomb
-                    returnArray[x][y] = 169
+                    threat_array[x][y] = 1
 
-        pil_image = Image.fromarray(returnArray)
+        # pil_image = Image.fromarray(returnArray)
         # pil_image = pil_image.convert("RGB")
         # pil_image.save("image.png")
+
+        # Flatten the array and conbine it
+        returnArray = np.concatenate((wall_array.flatten(), threat_array.flatten(), exit_array.flatten(), self_array.flatten()))
 
         return returnArray
         

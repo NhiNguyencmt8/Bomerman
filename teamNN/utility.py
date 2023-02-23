@@ -14,7 +14,7 @@ int euclidean_distance_to_exit(wrld:World)
 int euclidean_distance_to_monster(wrld:World) //Returns Nearest Monster
 
 """
-from teamNN.PriorityQueue import PriorityQueue
+from PriorityQueue import PriorityQueue
 
 
 def euclidean_dist(point_one, point_two):

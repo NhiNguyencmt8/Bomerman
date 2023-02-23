@@ -22,8 +22,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from project2.DQN import DQN
-from project2.ReplayMemory import ReplayMemory, Transition
+from DQN import DQN
+from ReplayMemory import ReplayMemory, Transition
 
 # set up matplotlib
 is_ipython = 'inline' in matplotlib.get_backend()
@@ -62,10 +62,11 @@ n_actions = len(env.action_list)
 env.reset()
 state = env.getStateImage()
 # n_observations = len(state)
-(length, width) = state.shape
+print(state.shape)
+(length,) = state.shape
 
-policy_net = DQN(length, width, n_actions).to(device)
-target_net = DQN(length, width, n_actions).to(device)
+policy_net = DQN(length, n_actions).to(device)
+target_net = DQN(length, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 
 optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
@@ -105,7 +106,7 @@ def plot_durations(show_result=False):
         plt.clf()
         plt.title('Training...')
     plt.xlabel('Episode')
-    plt.ylabel('Duration')
+    plt.ylabel('Score')
     plt.plot(durations_t.numpy())
     # Take 100 episode averages and plot them too
     if len(durations_t) >= 100:
@@ -172,7 +173,7 @@ def optimize_model():
 
 
 # Main Loop
-num_episodes = 20000
+num_episodes = 5000
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get it's state
