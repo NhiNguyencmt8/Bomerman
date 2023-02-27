@@ -15,9 +15,10 @@ n_actions = len(env.action_list)
 env.reset()
 state = env.getStateImage()
 # n_observations = len(state)
-(length, width) = state.shape
+# (length, width) = state.shape
 
-model = DQN(length, width, n_actions).to(device)
+(c, width, length) = state.shape
+model = DQN(c, n_actions).to(device)
 test = torch.load("../models/policy_net.pt");
 model.load_state_dict(torch.load("../models/policy_net.pt"))
 

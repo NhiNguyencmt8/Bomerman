@@ -65,7 +65,8 @@ class GameWrapper():
     def getStateImage(self):
         #Make an np array of size world.width() x world.height()
         #Fill it with 127s
-        threat_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
+        bomb_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
+        explosion_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
         wall_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
         exit_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
         self_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
@@ -75,22 +76,29 @@ class GameWrapper():
                 if self.gameObj.world.wall_at(x, y): # Walls
                     wall_array[x][y] = 1
                 if self.gameObj.world.explosion_at(x, y): # Explosion
-                    threat_array[x][y] = 1
+                    explosion_array[x][y] = 1
                 if self.gameObj.world.characters_at(x, y): # Player
                     self_array[x][y] = 1
                 if self.gameObj.world.monsters_at(x, y): # Monster
-                    threat_array[x][y] = 1
+                    # threat_array[x][y] = 1
+                    pass
                 if self.gameObj.world.exit_at(x, y): # Portal
                     exit_array[x][y] = 1
                 if self.gameObj.world.bomb_at(x, y): # Bomb
-                    threat_array[x][y] = 1
+                    bomb_array[x][y] = 1
 
         # pil_image = Image.fromarray(returnArray)
         # pil_image = pil_image.convert("RGB")
         # pil_image.save("image.png")
 
         # Flatten the array and conbine it
-        returnArray = np.concatenate((wall_array.flatten(), threat_array.flatten(), exit_array.flatten(), self_array.flatten()))
+        # returnArray = np.concatenate((wall_array.flatten(), threat_array.flatten(), exit_array.flatten(), self_array.flatten()))
+        returnArray = np.zeros((5, self.gameObj.world.width(), self.gameObj.world.height()))
+        returnArray[0] = wall_array
+        returnArray[1] = self_array
+        returnArray[2] = exit_array
+        returnArray[3] = bomb_array
+        returnArray[4] = explosion_array
 
         return returnArray
         

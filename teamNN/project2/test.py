@@ -63,10 +63,10 @@ env.reset()
 state = env.getStateImage()
 # n_observations = len(state)
 print(state.shape)
-(length,) = state.shape
+(c, width, length) = state.shape
 
-policy_net = DQN(length, n_actions).to(device)
-target_net = DQN(length, n_actions).to(device)
+policy_net = DQN(c, n_actions).to(device)
+target_net = DQN(c, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 
 optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
@@ -173,7 +173,7 @@ def optimize_model():
 
 
 # Main Loop
-num_episodes = 5000
+num_episodes = 50000
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get it's state
