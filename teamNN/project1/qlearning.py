@@ -5,6 +5,9 @@ from utility import *
 
 class Qlearning(object):
 
+
+    
+
     def __init__(self):
         """Establish initial weights and learning parameters."""
         self.monsterweight = 5
@@ -18,6 +21,7 @@ class Qlearning(object):
             # exitweight: int = 6
             # dfactor: float = 0.9 # constant?
             # alpha: float = 0.25 #constant?
+  
 
 
     def state(self,wrld):
@@ -31,8 +35,14 @@ class Qlearning(object):
         
         return s
     
-    def reward(self):  #get the reward of the next function or reward in general 
-        r = 10
+    def reward(self,wrld,a):
+        
+        if euclidean_distance_to_monster(wrld,a) == 0:
+            r = -500
+        if euclidean_distance_to_exit(wrld,a) == 0:
+            r = 100
+        else:   #get the reward of the next function or reward in general 
+            r = -1
         return r
 
 
@@ -44,44 +54,70 @@ class Qlearning(object):
         else:
             return self.policy(s, actions,wrld)
 
-    def policy(self, s, actions,wrld):
-        """Return the best action for this state."""
-        max_value = max([self.Q(s,a,wrld) for a in actions])
-        max_actions = [a for a in actions if self.Q(s,a,wrld) == max_value]
+    # def policy(self, s, actions,wrld):
+    #     """Return the best action for this state."""
+    #     max_value = max([self.Q(s, a, wrld)[0] for a in actions])
+    #     max_actions = [a for a in actions if self.Q(s, a, wrld)[0] == max_value]
+
+    #     return random.choice(max_actions)
+    
+    def policy(self, s, actions, wrld):
+        q_values = [self.Q(s, a, wrld) for a in actions]
+        max_value = max([q[0] for q in q_values])
+        max_actions = [actions[i] for i, q in enumerate(q_values) if q[0] == max_value]
+        if not max_actions:
+            return random.choice(actions)
         return random.choice(max_actions)
 
     def Q(self, s, a,wrld):
-        qstate = (self.monsterweight*euclidean_distance_to_monster(wrld)) - (self.exitweight*euclidean_distance_to_exit(wrld))   #distancetobomb?
+        # print("inq")
+        # print(self.monsterweight)
+        # print(self.exitweight)
+        qstate = (self.monsterweight*manhattan_distance_to_monster(wrld)) - (self.exitweight*manhattan_distance_to_exit(wrld))   #distancetobomb?
         qvalue = (qstate,s,a)
-        print(qvalue)
         return qvalue 
         """Return the estimated Q-value of this action in this state."""
        # return 0 # YOU CHANGE THIS
 
     #def observe(self, s, a, sp, r, actions):
 
-    def observe(self, state, action, r,actions,wrld):
-        qmax = self.getMaxQ(state,actions,wrld)
+    def observe(self, state, action, stateupdate,r,actions,wrld):
+        qmaxfunction = self.getMaxQ(state,actions,wrld)
+        qmax = qmaxfunction[0]
+        actionmax = qmaxfunction[1]
         qstate = self.Q(state,action,wrld)
         q = qstate[0]
-        delta = r + self.gamma*qmax - q
+        q2= self.Q(stateupdate,action,wrld)
+        delta = (r + self.gamma*qmax*q) - q2[0]
+        # print("before")
+        # print(r)
+        # print(self.gamma)
+        # print(qmax)
+        # print(q)
+        # print(q2[0])
+        # print(delta)
+        # print("endofdelta")
+        # print(self.monsterweight)
+        # print(self.exitweight)
         self.monsterweight = self.monsterweight + self.alpha*delta*euclidean_distance_to_monster(wrld)
         self.exitweight = self.exitweight + self.alpha*delta*euclidean_distance_to_exit(wrld)
-        return self.monsterweight,self.exitweight
+        # print("after")
+        # print(self.alpha*delta*euclidean_distance_to_monster(wrld))
+        # print(self.monsterweight)
+        # print(self.exitweight)
+        return self.monsterweight,self.exitweight,actionmax
         """Update weights based on this observed step."""
 
-        # YOU FILL THIS IN
+        
     def getMaxQ(self,state,actions,wrld):
         q_list = []
         for a in actions:
-            qvalues = self.Q(state,a,wrld)
-            print(qvalues)
-            q = qvalues[0]
-            print(q)
+            q = self.Q(state,a,wrld)
             q_list.append(q)
-        if len(q_list) ==0:
+        if len(q_list) == 0:
             return 0
-        return max(q_list)
+        q_list.sort(reverse = True)
+        return q_list[0]
     
 
     #our functions    

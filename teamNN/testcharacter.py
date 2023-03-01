@@ -28,20 +28,32 @@ class TestCharacter(CharacterEntity):
     qlearning = Qlearning()
 
 
+
+        
+            
+            
+         
+
+
     #Function starts here
     def do(self, wrld):
-        for episode in range(100):
 
-            s = qlearning.state(wrld)
-            #print(s)
-            #print(s[1])
-            actions = eight_neighbors(wrld,s[0],s[1])
-            #print(actions)
-            a = qlearning.choose(s,actions,wrld)
-            r = qlearning.reward()
-            learnweight = qlearning.observe(s,a,r,actions,wrld)
-        #print(learnweight)    
-        
+        #print(self.qlearning.monsterweight)
+        s = self.qlearning.state(wrld)
+        actions = eight_neighbors(wrld,s[0],s[1])
+        #print(actions)
+        a = self.qlearning.choose(s,actions,wrld)
+        self.move(a[0],a[1])
+            
+            
+        sp = self.qlearning.state(wrld)
+        r = self.qlearning.reward(wrld,a)
+        learnweight = self.qlearning.observe(s,a,sp,r,actions,wrld)
+            # print("learn")
+        #print( learnweight )
+        #bestaction = learnweight[2]
+
+
         print("Current State: ", self.stateMachine)
         self.bombCoolDown -= 1
         #State Machines starts here
@@ -78,7 +90,7 @@ class TestCharacter(CharacterEntity):
                 nextCell = self.ai.get_next_move(wrld)
                 #Perform the move
                 self.move(nextCell[0] - self.x, nextCell[1] - self.y)
-                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld)))
+                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld),learnweight[0],learnweight[1]))
                 print("Selected Move: ", nextCell)
 
                 #If can place bomb -> placebomb
@@ -100,11 +112,11 @@ class TestCharacter(CharacterEntity):
                 nextCell = self.ai.get_next_move(wrld)
                 self.move(nextCell[0] - self.x, nextCell[1] - self.y)
 
-                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld)))
+                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld),learnweight[0],learnweight[1]))
                 print("Selected Move: ", nextCell)
 
                 # Evaluating states and current position to place bomb if possible
-                if evaluate_state(wrld, character_location(wrld), monster_location(wrld)) < -20:
+                if evaluate_state(wrld, character_location(wrld), monster_location(wrld),learnweight[0],learnweight[1]) < -20:
                     self.stateMachine = State.PLACE_BOMB
                 if self.can_place_bomb(nextCell):
                     self.stateMachine = State.PLACE_BOMB
@@ -158,3 +170,5 @@ class TestCharacter(CharacterEntity):
                 self.move(-1, 1)
             elif best_move == right_down_score:
                 self.move(1, 1)
+
+   
