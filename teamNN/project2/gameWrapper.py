@@ -7,13 +7,12 @@ import numpy as np
 import pygame
 from PIL import Image
 
-from traningchracter import TrainingCharacter
-
-sys.path.insert(0, '../../bomberman')
+# sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
+from traningchracter import TrainingCharacter
 from utility import euclidean_distance_to_exit
-from game import Game
+from Bomberman.game import Game
 
 
 class GameWrapper():
@@ -23,6 +22,7 @@ class GameWrapper():
     gameObj: Game = None
     mapFile = None
     lastEucDist = 0
+    lastScore = 0
 
     # action_list: list[str] = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", "wb", "wb", "ab", "sb", "db", "wab",
     #                                 "wdb", "sab", "sdb",
@@ -69,6 +69,64 @@ class GameWrapper():
         # print(np.array(grayscale_image).shape)
         return np.array(grayscale_image)
 
+
+    def getStateImageNew(self):
+        # Make an np array of size world.width() x world.height()
+        # Fill it with 127s
+        return_array = np.zeros((self.gameObj.world.width(), self.gameObj.world.height()))
+
+        char_pos = [-1, -1]
+        bomb_pos = [-1, -1]
+
+        for x in range(self.gameObj.world.width()):
+            for y in range(self.gameObj.world.height()):
+                if self.gameObj.world.wall_at(x, y):  # Walls
+                    return_array[x][y] = 0.16
+                if self.gameObj.world.explosion_at(x, y):  # Explosion
+                    return_array[x][y] = .5
+                if self.gameObj.world.characters_at(x, y):  # Player
+                    char_pos[0] = x
+                    char_pos[1] = y
+                    return_array[x][y] = 1
+                if self.gameObj.world.monsters_at(x, y):  # Monster
+                    # threat_array[x][y] = 1
+                    pass
+                if self.gameObj.world.exit_at(x, y):  # Portal
+                    return_array[x][y] = 0.81
+                if self.gameObj.world.bomb_at(x, y):  # Bomb
+                    bomb_pos[0] = x
+                    bomb_pos[1] = y
+                    return_array[x][y] = 0.33
+
+        # pil_image = Image.fromarray(returnArray)
+        # pil_image = pil_image.convert("RGB")
+        # pil_image.save("image.png")
+
+        # Flatten the array and conbine it
+        priorsArray = np.zeros(3)
+        priorsArray[0] = euclidean_distance_to_exit(self.gameObj.world, char_pos) / 20
+        isInBombPathX : bool = False
+        isInBombPathY : bool = False
+        if char_pos[0] == bomb_pos[0]:
+            isInBombPathX = True
+            for y in range(min(char_pos[1], bomb_pos[1]), max(char_pos[1], bomb_pos[1])):
+                if self.gameObj.world.wall_at(char_pos[0], y):
+                    isInBombPathX = False
+                    break
+        if char_pos[1] == bomb_pos[1]:
+            isInBombPathY = True
+            for x in range(min(char_pos[0], bomb_pos[0]), max(char_pos[0], bomb_pos[0])):
+                if self.gameObj.world.wall_at(x, char_pos[1]):
+                    isInBombPathY = False
+                    break
+        if isInBombPathX:
+            priorsArray[1] = 1
+        if isInBombPathY:
+            priorsArray[2] = 1
+
+        return_array = np.append(return_array.flatten(), priorsArray)
+        return return_array
+
     def getStateImage(self):
         # Make an np array of size world.width() x world.height()
         # Fill it with 127s
@@ -78,7 +136,8 @@ class GameWrapper():
         exit_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
         self_array = np.full((self.gameObj.world.width(), self.gameObj.world.height()), 0)
 
-        char_pos = [0, 0]
+        char_pos = [-1, -1]
+        bomb_pos = [-1, -1]
 
         for x in range(self.gameObj.world.width()):
             for y in range(self.gameObj.world.height()):
@@ -96,6 +155,8 @@ class GameWrapper():
                 if self.gameObj.world.exit_at(x, y):  # Portal
                     exit_array[x][y] = 1
                 if self.gameObj.world.bomb_at(x, y):  # Bomb
+                    bomb_pos[0] = x
+                    bomb_pos[1] = y
                     bomb_array[x][y] = 1
 
         # pil_image = Image.fromarray(returnArray)
@@ -112,31 +173,56 @@ class GameWrapper():
         returnArray[4] = explosion_array
         returnArray[5] = np.zeros((self.gameObj.world.width(), self.gameObj.world.height()))
         returnArray[5][0][0] = euclidean_distance_to_exit(self.gameObj.world, char_pos) / 20
+        isInBombPathX : bool = False
+        isInBombPathY : bool = False
+        if char_pos[0] == bomb_pos[0]:
+            isInBombPathX = True
+            for y in range(min(char_pos[1], bomb_pos[1]), max(char_pos[1], bomb_pos[1])):
+                if self.gameObj.world.wall_at(char_pos[0], y):
+                    isInBombPathX = False
+                    break
+        if char_pos[1] == bomb_pos[1]:
+            isInBombPathY = True
+            for x in range(min(char_pos[0], bomb_pos[0]), max(char_pos[0], bomb_pos[0])):
+                if self.gameObj.world.wall_at(x, char_pos[1]):
+                    isInBombPathY = False
+                    break
+        if isInBombPathX:
+            returnArray[5][0][1] = 1
+        if isInBombPathY:
+            returnArray[5][0][2] = 1
 
         return returnArray
+
+    def render(self):
+        self.gameObj.display_gui()
+
 
     def nextStep(self, actionString):
         """ Performs the actionString on the game, and returns the reward """
         next(iter(self.gameObj.world.characters.values()))[0].setNextAction(actionString)
         (self.gameObj.world, self.gameObj.events) = self.gameObj.world.next()
-        self.gameObj.display_gui()
         # pygame.time.wait(1000)
         self.gameObj.world.next_decisions()
-        euclidean_distance = 0
+
+
+        winOrLoss = 0
         if self.gameObj.done():
             euclidean_distance = self.lastEucDist
-            # print("Done")
-            # pass
-            # time.sleep(2)
+            if self.gameObj.world.scores["me"] > 0:
+                winOrLoss = 5000
+                # print("WIN")
+            else:
+                winOrLoss = -500
+                # print("LOSS")
         else:
-            euclidean_distance = euclidean_distance_to_exit(self.gameObj.world) * 50
+            euclidean_distance = euclidean_distance_to_exit(self.gameObj.world) * 5
             self.lastEucDist = euclidean_distance
-        if self.gameObj.world.scores["me"] > 0:
-            winOrLoss = 500
-        else:
-            winOrLoss = -500
+
 
         # score = (self.gameObj.world.time - 5000) - int(euclidean_distance) + winOrLoss
-        score = -int(euclidean_distance) + winOrLoss
-        # print(score)
-        return score, self.gameObj.done()
+        score = -int(euclidean_distance) + winOrLoss + (self.gameObj.world.time - 5000)
+        returnScore = score - self.lastScore
+        self.lastScore = score
+        # print(returnScore)
+        return returnScore, self.gameObj.done()
