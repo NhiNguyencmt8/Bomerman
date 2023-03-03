@@ -36,7 +36,7 @@ def test():
 
     env_name = "Bomberman"
     has_continuous_action_space = False
-    max_ep_len = 1000           # max timesteps in one episode
+    max_ep_len = 5000           # max timesteps in one episode
     action_std = 0.1            # set same std for action distribution which was used while saving
 
     render = True              # render environment on screen

@@ -23,6 +23,9 @@ class GameWrapper():
     mapFile = None
     lastEucDist = 0
     lastScore = 0
+    progress = 0
+    char_pos = [-1, -1]
+    bomb_pos = [-1, -1]
 
     # action_list: list[str] = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", "wb", "wb", "ab", "sb", "db", "wab",
     #                                 "wdb", "sab", "sdb",
@@ -44,7 +47,7 @@ class GameWrapper():
         minX = 0
         minY = 0
         maxX = 7
-        maxY = 3
+        maxY = 0
         startX = random.randint(minX, maxX)
         startY = random.randint(minY, maxY)
         self.gameObj.add_character(TrainingCharacter("me", "C", startX, startY))
@@ -75,9 +78,6 @@ class GameWrapper():
         # Fill it with 127s
         return_array = np.zeros((self.gameObj.world.width(), self.gameObj.world.height()))
 
-        char_pos = [-1, -1]
-        bomb_pos = [-1, -1]
-
         for x in range(self.gameObj.world.width()):
             for y in range(self.gameObj.world.height()):
                 if self.gameObj.world.wall_at(x, y):  # Walls
@@ -85,8 +85,8 @@ class GameWrapper():
                 if self.gameObj.world.explosion_at(x, y):  # Explosion
                     return_array[x][y] = .5
                 if self.gameObj.world.characters_at(x, y):  # Player
-                    char_pos[0] = x
-                    char_pos[1] = y
+                    self.char_pos[0] = x
+                    self.char_pos[1] = y
                     return_array[x][y] = 1
                 if self.gameObj.world.monsters_at(x, y):  # Monster
                     # threat_array[x][y] = 1
@@ -94,8 +94,8 @@ class GameWrapper():
                 if self.gameObj.world.exit_at(x, y):  # Portal
                     return_array[x][y] = 0.81
                 if self.gameObj.world.bomb_at(x, y):  # Bomb
-                    bomb_pos[0] = x
-                    bomb_pos[1] = y
+                    self.bomb_pos[0] = x
+                    self.bomb_pos[1] = y
                     return_array[x][y] = 0.33
 
         # pil_image = Image.fromarray(returnArray)
@@ -104,19 +104,19 @@ class GameWrapper():
 
         # Flatten the array and conbine it
         priorsArray = np.zeros(3)
-        priorsArray[0] = euclidean_distance_to_exit(self.gameObj.world, char_pos) / 20
+        priorsArray[0] = euclidean_distance_to_exit(self.gameObj.world, self.char_pos) / 20
         isInBombPathX : bool = False
         isInBombPathY : bool = False
-        if char_pos[0] == bomb_pos[0]:
+        if self.char_pos[0] == self.bomb_pos[0]:
             isInBombPathX = True
-            for y in range(min(char_pos[1], bomb_pos[1]), max(char_pos[1], bomb_pos[1])):
-                if self.gameObj.world.wall_at(char_pos[0], y):
+            for y in range(min(self.char_pos[1], self.bomb_pos[1]), max(self.char_pos[1], self.bomb_pos[1])):
+                if self.gameObj.world.wall_at(self.char_pos[0], y):
                     isInBombPathX = False
                     break
-        if char_pos[1] == bomb_pos[1]:
+        if self.char_pos[1] == self.bomb_pos[1]:
             isInBombPathY = True
-            for x in range(min(char_pos[0], bomb_pos[0]), max(char_pos[0], bomb_pos[0])):
-                if self.gameObj.world.wall_at(x, char_pos[1]):
+            for x in range(min(self.char_pos[0], self.bomb_pos[0]), max(self.char_pos[0], self.bomb_pos[0])):
+                if self.gameObj.world.wall_at(x, self.char_pos[1]):
                     isInBombPathY = False
                     break
         if isInBombPathX:
@@ -207,22 +207,37 @@ class GameWrapper():
 
 
         winOrLoss = 0
-        if self.gameObj.done():
-            euclidean_distance = self.lastEucDist
-            if self.gameObj.world.scores["me"] > 0:
-                winOrLoss = 5000
-                # print("WIN")
-            else:
-                winOrLoss = -500
-                # print("LOSS")
-        else:
-            euclidean_distance = euclidean_distance_to_exit(self.gameObj.world) * 5
-            self.lastEucDist = euclidean_distance
+        # if self.gameObj.done():
+        #     euclidean_distance = self.lastEucDist
+        #     if self.gameObj.world.scores["me"] > 0:
+        #         winOrLoss = 5000
+        #         # print("WIN")
+        #     else:
+        #         winOrLoss = -500
+        #         # print("LOSS")
+        # else:
+        #     euclidean_distance = euclidean_distance_to_exit(self.gameObj.world) * 20
+        #     self.lastEucDist = euclidean_distance
 
 
         # score = (self.gameObj.world.time - 5000) - int(euclidean_distance) + winOrLoss
-        score = -int(euclidean_distance) + winOrLoss + (self.gameObj.world.time - 5000)
-        returnScore = score - self.lastScore
-        self.lastScore = score
-        # print(returnScore)
+        # score = euclidean_distance + winOrLoss + (self.gameObj.world.time - 5000)
+        # score = self.gameObj.world.scores["me"] - euclidean_distance
+        # returnScore = score - self.lastScore
+        # self.lastScore = score
+
+        returnScore = -1
+        print("Progess: "+ str(self.progress))
+        print("Char Pos: " + str(self.char_pos[1]))
+        if self.char_pos[1] > self.progress:
+            self.progress = self.char_pos[1]
+            returnScore = 10
+
+        if self.gameObj.done():
+            if self.gameObj.world.scores["me"] > 0:
+                returnScore = 5000
+            else:
+                returnScore = -200
+
+        print(returnScore)
         return returnScore, self.gameObj.done()

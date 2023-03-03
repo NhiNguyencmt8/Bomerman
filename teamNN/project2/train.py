@@ -18,7 +18,7 @@ def train():
 
     has_continuous_action_space = False  # continuous action space; else discrete
 
-    max_ep_len = 1000                   # max timesteps in one episode
+    max_ep_len = 5000                   # max timesteps in one episode
     max_training_timesteps = int(3e6)   # break training loop if timeteps > max_training_timesteps
 
     print_freq = max_ep_len * 10        # print avg reward in the interval (in num timesteps)
@@ -179,7 +179,10 @@ def train():
             action = env.action_list[actionID]
             reward, done = env.nextStep(action)
             state = env.getStateImageNew()
+
+            # Uncomment to render environment
             env.render()
+            time.sleep(0.5)
 
             # saving reward and is_terminals
             ppo_agent.buffer.rewards.append(reward)
@@ -243,7 +246,7 @@ def train():
         i_episode += 1
 
     log_f.close()
-    env.close()
+    # env.close()
 
     # print total training time
     print("============================================================================================")
