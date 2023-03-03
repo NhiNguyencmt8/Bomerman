@@ -8,7 +8,7 @@ sys.path.insert(0, '../bomberman')
 
 sys.path.insert(1, '../')
 from utility import *
-from project1.qlearning import *
+
 
 
 
@@ -106,7 +106,6 @@ class AI():
                 return value
 
 
-qlearning = Qlearning()
 
 def prioritize_moves_for_self(wrld, possible_moves):
     # Prioritize moves that are closer to the exit to prune the tree more
@@ -117,7 +116,7 @@ def prioritize_moves_for_monster(wrld, possible_moves):
     # Prioritize moves that are closer to the exit to prune the tree more
     possible_moves.sort(key=lambda move: euclidean_dist(move, character_location(wrld)))
 
-def evaluate_state(wrld, characterLocation=None, monsterLocation=None,monsterweight=qlearning.monsterweight,exitweight=qlearning.exitweight):
+def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
             """Returns a value for the current world state.
             wrld: World object
             returns: float"""
@@ -130,13 +129,13 @@ def evaluate_state(wrld, characterLocation=None, monsterLocation=None,monsterwei
             number_of_move_options = len(eight_neighbors(wrld, characterLocation[0], characterLocation[1]))
             distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
             if len(wrld.monsters) == 0:
-                return int(distance_to_exit * exitweight) + number_of_move_options * 10
+                return int(distance_to_exit*6) + number_of_move_options * 10
             distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
             if distance_to_monster <= 2:  # The monster is within one tile away
                 return -100
             
-            print(exitweight,monsterweight)
-            return int((distance_to_monster *monsterweight ) - distance_to_exit * exitweight + number_of_move_options * 5)
+            
+            return int((distance_to_monster *5 ) - distance_to_exit * 6 + number_of_move_options * 5)
 
 
 

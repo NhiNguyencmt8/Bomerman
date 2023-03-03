@@ -9,7 +9,7 @@ from entity import CharacterEntity
 sys.path.insert(1, '../teamNN')
 from utility import *
 from project1.minimax import *
-from project1.qlearning import *
+from project2.qlearning import *
 
 #Organizing all states
 class State(Enum):
@@ -25,34 +25,8 @@ class TestCharacter(CharacterEntity):
     bombCoolDown = 0
     stateMachine = State.START
     ai = AI()
-    qlearning = Qlearning()
 
-
-
-        
-            
-            
-         
-
-
-    #Function starts here
     def do(self, wrld):
-
-        #print(self.qlearning.monsterweight)
-        s = self.qlearning.state(wrld)
-        actions = eight_neighbors(wrld,s[0],s[1])
-        #print(actions)
-        a = self.qlearning.choose(s,actions,wrld)
-        self.move(a[0],a[1])
-            
-            
-        sp = self.qlearning.state(wrld)
-        r = self.qlearning.reward(wrld,a)
-        learnweight = self.qlearning.observe(s,a,sp,r,actions,wrld)
-            # print("learn")
-        #print( learnweight )
-        #bestaction = learnweight[2]
-
 
         print("Current State: ", self.stateMachine)
         self.bombCoolDown -= 1
