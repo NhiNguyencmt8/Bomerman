@@ -65,23 +65,23 @@ g.add_character(training
 for episode in range(num_episodes):
         
         env.reset()
-        s = qlearning.state(g.world)
+        s = qlearning.state(g.gameObj.world)
         done = False
         while not done:
             # chose random action
             actionString = ['w','a','s','d','b']
-            a = qlearning.choose(s,actionString,g.world)
+            a = qlearning.choose(s,actionString,g.gameObj.world)
             #Do random action,get next state and reward
             print(a)
             check = training.setNextAction(a)
             print(check)
-            training.do(g.world)
-            sp = qlearning.state(g.world)
-            newlocation = character_location(g.world)
+            training.do(g.gameObj.world)
+            sp = qlearning.state(g.gameObj.world)
+            newlocation = character_location(g.gameObj.world)
             print(newlocation)
-            r = qlearning.reward(g.world,newlocation)
-            qlearning.observe(s,a,sp,r,actionString,g.world)
-            newstate = qlearning.state(g.world)
+            r = qlearning.reward(g.gameObj.world,newlocation)
+            qlearning.observe(s,a,sp,r,actionString,g.gameObj.world)
+            newstate = qlearning.state(g.gameObj.world)
             s = newstate
 
         qlearning.update_epsilon

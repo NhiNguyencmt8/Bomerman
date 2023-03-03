@@ -130,7 +130,7 @@ class GameWrapper():
         return score, self.gameObj.done()
     
     def add_character(self, c):
-        self.world.add_character(c)
+        self.gameObj.world.add_character(c)
 
     
   
