@@ -64,7 +64,7 @@ class TestCharacter(CharacterEntity):
                 nextCell = self.ai.get_next_move(wrld)
                 #Perform the move
                 self.move(nextCell[0] - self.x, nextCell[1] - self.y)
-                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld),learnweight[0],learnweight[1]))
+                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld)))
                 print("Selected Move: ", nextCell)
 
                 #If can place bomb -> placebomb
@@ -86,11 +86,11 @@ class TestCharacter(CharacterEntity):
                 nextCell = self.ai.get_next_move(wrld)
                 self.move(nextCell[0] - self.x, nextCell[1] - self.y)
 
-                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld),learnweight[0],learnweight[1]))
+                print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld)))
                 print("Selected Move: ", nextCell)
 
                 # Evaluating states and current position to place bomb if possible
-                if evaluate_state(wrld, character_location(wrld), monster_location(wrld),learnweight[0],learnweight[1]) < -20:
+                if evaluate_state(wrld, character_location(wrld), monster_location(wrld)) < -20:
                     self.stateMachine = State.PLACE_BOMB
                 if self.can_place_bomb(nextCell):
                     self.stateMachine = State.PLACE_BOMB

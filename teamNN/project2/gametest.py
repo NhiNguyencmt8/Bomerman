@@ -130,6 +130,9 @@ class GameWrapper():
     
     def add_character(self, c):
         self.gameObj.world.add_character(c)
+    
+    def add_monster(self, m):
+        self.gameObj.world.add_monster(m)
 
     
   

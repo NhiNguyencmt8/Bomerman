@@ -12,13 +12,18 @@ class Qlearning(object):
         self.monsterweight = 5
         self.exitweight = 6
         #self.weight = collections.defaultdict(float) # Each w((f,a)) starts at 0
-        self.epsilon = 1.0# 0.05 # Exploration rate
+        self.epsilon =1.0# 0.05 # Exploration rate
         self.gamma = 0.99 # Discount factor
         self.alpha = 0.01 # Learning rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
+
+       
+        
+        #quit()
         
     
+
             # monsterweight: int = 5
             # exitweight: int = 6
             # dfactor: float = 0.9 # constant?
@@ -34,9 +39,9 @@ class Qlearning(object):
     def reward(self,wrld,a):
         
         if euclidean_distance_to_monster(wrld,a) == 0:
-            r = -300
+            r = -500
         if euclidean_distance_to_exit(wrld,a) == 0:
-            r = 100
+            r = 500
         else:   #get the reward of the next function or reward in general 
             r = -1
         return r
@@ -69,7 +74,14 @@ class Qlearning(object):
         # print("inq")
         # print(self.monsterweight)
         # print(self.exitweight)
-        qstate = (self.monsterweight*manhattan_distance_to_monster(wrld)) - (self.exitweight*manhattan_distance_to_exit(wrld))   #distancetobomb?
+        qstate = (self.monsterweight*1/1+manhattan_distance_to_monster(wrld)) - (self.exitweight*1/1+manhattan_distance_to_exit(wrld)) 
+        # print("in Q state")  #distancetobomb?
+        # print(qstate)
+        # print(self.monsterweight)
+        # print(self.exitweight)
+        # print("distances")
+        # print(manhattan_distance_to_exit(wrld))
+        # print(manhattan_distance_to_monster(wrld))
         qvalue = (qstate,s,a)
         return qvalue
         """Return the estimated Q-value of this action in this state."""
@@ -85,8 +97,10 @@ class Qlearning(object):
         q = qstate[0]
         q2= self.Q(stateupdate,action,wrld)
         delta = (r + self.gamma*qmax*q) - q2[0]
-        self.monsterweight = self.monsterweight + self.alpha*delta*euclidean_distance_to_monster(wrld)
-        self.exitweight = self.exitweight + self.alpha*delta*euclidean_distance_to_exit(wrld)
+        
+        self.monsterweight = self.monsterweight + self.alpha*delta*1/1+euclidean_distance_to_monster(wrld)
+        self.exitweight = self.exitweight + self.alpha*delta*1/1+euclidean_distance_to_exit(wrld)
+        
         return self.monsterweight,self.exitweight,actionmax
         """Update weights based on this observed step."""
     

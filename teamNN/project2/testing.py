@@ -38,29 +38,30 @@ from utility import *
 from qlearning import Qlearning
 from trainingcharacter import *
 from gametest import *
+from monsters.stupid_monster import StupidMonster
  
 
 # if gpu is to be used
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # g = Game.fromfile('map.txt')
-g = Game.fromfile('map.txt')
+
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # g = Game.fromfile('map.txt') 
+random.seed(123) # TODO Change this if you want different random choices
+env: GameWrapper = GameWrapper("map.txt")
 
-# env: GameWrapper = GameWrapper("map.txt")
-
-# g = env
+g = env
 
 # Get number of actions from gym action space
-# n_actions = len(env.action_list)
-# # Get the number of state observations
-# env.reset()
-# state = env.getStateImage()
+n_actions = len(env.action_list)
+# Get the number of state observations
+env.reset()
+state = env.getStateImage()
 
 # Main Loop
-num_episodes = 50000
+num_episodes = 500
 qlearning = Qlearning()
 
                               
@@ -73,38 +74,53 @@ training = TrainingCharacter("me", # name
 g.add_character(training
 )
 
+g.add_monster(StupidMonster("stupid", # name
+                            "S",      # avatar
+                            3, 9      # position
+))
 
 for episode in range(num_episodes):
         
-        s = qlearning.state(g.world)
-        done = False
-        while not done:
+        env.reset()
+        
+        s = qlearning.state(g.gameObj.world)
+      
+        
+        while not g.gameObj.done():
             # chose random action
             actionString = ['w','a','s','d','b']
-            a = qlearning.choose(s,actionString,g.world)
+            a = qlearning.choose(s,actionString,g.gameObj.world)
             #Do random action,get next state and reward
-            training.setNextAction(a)
-            print(a)
-            training.do(g.world)
+            #training.setNextAction(a)
+            
+            env.nextStep(a)
+            if not g.gameObj.done():
+                sp = qlearning.state(g.gameObj.world)
+                newlocation = character_location(g.gameObj.world)
+                print("newlocation")
+                print(newlocation)
+               
+                r = qlearning.reward(g.gameObj.world,newlocation)
+                qlearning.observe(s,a,sp,r,actionString,g.gameObj.world)
+                
+                newstate = newlocation
+                s = newstate
+                print(qlearning.monsterweight,qlearning.exitweight) 
+                print("newstate")
+                print(newstate)
+                print(s)
+        
+                
 
-            sp = qlearning.state(g.world)
-            newlocation = character_location(g.world)
-            print(newlocation)
-            
-            r = qlearning.reward(g.world,newlocation)
-            qlearning.observe(s,a,sp,r,actionString,g.world)
-            newstate = qlearning.state(g.world)
-            s = newstate
-            print("in while")
-            g.go(100)  
-            
-            
 
-        qlearning.update_epsilon
-        print("done while")
+        
+        
+        qlearning.update_epsilon()
+        print(qlearning.update_epsilon())
+
         
 
-print(qlearning.qvalue) 
+print(qlearning.monsterweight,qlearning.exitweight) 
 
  
 

@@ -129,13 +129,13 @@ def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
             number_of_move_options = len(eight_neighbors(wrld, characterLocation[0], characterLocation[1]))
             distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
             if len(wrld.monsters) == 0:
-                return int(distance_to_exit*6) + number_of_move_options * 10
+                return int(distance_to_exit*146689897771372.38) #number_of_move_options * 10
             distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
             if distance_to_monster <= 2:  # The monster is within one tile away
                 return -100
             
             
-            return int((distance_to_monster *5 ) - distance_to_exit * 6 + number_of_move_options * 5)
+            return int((distance_to_monster *146689901290001.38  ) - distance_to_exit * 146689897771372.38 )#+ number_of_move_options * 5)
 
 
 
