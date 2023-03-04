@@ -7,13 +7,13 @@ import numpy as np
 import pygame
 from PIL import Image
 
+
 # sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
 from traningchracter import TrainingCharacter
-from utility import euclidean_distance_to_exit
 from Bomberman.game import Game
-
+from utility import *
 
 class GameWrapper():
     """ A wrapper for the game, that adds findPossibleAction, and nextStep functions """
@@ -227,11 +227,11 @@ class GameWrapper():
         # self.lastScore = score
 
         returnScore = -1
-        print("Progess: "+ str(self.progress))
-        print("Char Pos: " + str(self.char_pos[1]))
+        # print("Progess: "+ str(self.progress))
+        # print("Char Pos: " + str(self.char_pos[1]))
         if self.char_pos[1] > self.progress:
             self.progress = self.char_pos[1]
-            returnScore = 10
+            returnScore = 100
 
         if self.gameObj.done():
             if self.gameObj.world.scores["me"] > 0:
@@ -239,5 +239,26 @@ class GameWrapper():
             else:
                 returnScore = -200
 
-        print(returnScore)
+        isInBombPath: bool = False
+        if self.char_pos[0] == self.bomb_pos[0]:
+            isInBombPath = True
+            for y in range(min(self.char_pos[1], self.bomb_pos[1]), max(self.char_pos[1], self.bomb_pos[1])):
+                if self.gameObj.world.wall_at(self.char_pos[0], y):
+                    isInBombPath = False
+                    break
+        if self.char_pos[1] == self.bomb_pos[1]:
+            isInBombPath = True
+            for x in range(min(self.char_pos[0], self.bomb_pos[0]), max(self.char_pos[0], self.bomb_pos[0])):
+                if self.gameObj.world.wall_at(x, self.char_pos[1]):
+                    isInBombPath = False
+                    break
+        if isInBombPath:
+            returnScore -= -1
+
+        if self.bomb_pos[0] != -1:
+            distanceToBomb = euclidean_dist(self.char_pos, self.bomb_pos)
+            if distanceToBomb < 3:
+                returnScore += 2
+
+        # print(returnScore)
         return returnScore, self.gameObj.done()

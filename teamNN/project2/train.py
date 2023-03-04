@@ -182,7 +182,7 @@ def train():
 
             # Uncomment to render environment
             env.render()
-            time.sleep(0.5)
+            # time.sleep(0.5)
 
             # saving reward and is_terminals
             ppo_agent.buffer.rewards.append(reward)
