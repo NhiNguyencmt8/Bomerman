@@ -104,7 +104,6 @@ class GameWrapper():
         return returnArray
         
 
-
     def nextStep(self, actionString):
         """ Performs the actionString on the game, and returns the reward """
         next(iter(self.gameObj.world.characters.values()))[0].setNextAction(actionString)

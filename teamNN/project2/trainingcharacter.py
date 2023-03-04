@@ -18,13 +18,15 @@ class TrainingCharacter(CharacterEntity):
     
 
 
-    def do(self, wrld):
+    def do(self,wrld):
+        
         # Commands
         dx, dy = 0, 0
         bomb = False
         # Handle input
         # for c in input("How would you like to move (w=up,a=left,s=down,d=right,b=bomb)? "):
         for c in self.nextActionString:
+            
             if 'w' == c:
                 dy -= 1
             if 'a' == c:
@@ -38,4 +40,5 @@ class TrainingCharacter(CharacterEntity):
         # Execute commands
         if bomb:
             self.place_bomb()
+         
         self.move(dx, dy)

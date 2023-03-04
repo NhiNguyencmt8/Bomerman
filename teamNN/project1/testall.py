@@ -1,13 +1,15 @@
 # This is necessary to find the main code
 import sys
+sys.path.insert(0, '../../bomberman')
+sys.path.insert(1, '..')
+sys.path.insert(1, '../teamNN')
 
 import pygame
 
 from monsters.selfpreserving_monster import SelfPreservingMonster
-from teamNN.interactivecharacter import InteractiveCharacter
+from interactivecharacter import InteractiveCharacter
 
-sys.path.insert(0, '../../bomberman')
-sys.path.insert(1, '..')
+
 
 # Import necessary stuff
 import random
@@ -15,7 +17,7 @@ from game import Game
 from monsters.stupid_monster import StupidMonster
 
 # TODO This is your code!
-sys.path.insert(1, '../teamNN')
+
 from testcharacter import TestCharacter
 
 numberOfGames = 10  # Number of games to play for each variant
